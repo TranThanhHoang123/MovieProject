@@ -4,6 +4,8 @@ from . import views
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet, basename='user')  # Specify the basename here
 router.register(r'role', views.RoleViewSet, basename='role')  # Specify the basename here
+router.register(r'genre', views.GenreViewSet, basename='genre')  # Specify the basename here
+router.register(r'movie', views.MovieViewSet, basename='movie')  # Specify the basename here
 urlpatterns = [
     path('', include(router.urls)),
 ]
