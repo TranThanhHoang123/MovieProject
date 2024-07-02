@@ -23,6 +23,14 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+from django.contrib.auth.hashers import check_password
+from rest_framework import serializers
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
 
 
 
