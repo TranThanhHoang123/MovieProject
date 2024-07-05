@@ -63,3 +63,15 @@ class MovieGenre(models.Model):
         unique_together = ['movie','genre']
     def __str__(self):
         return f'{self.movie.name} - {self.genre.name}'
+
+
+class MovieEpisode(models.Model):
+    movie = models.ForeignKey(Movie, related_name='episodes', on_delete=models.CASCADE)
+    episode_number = models.PositiveIntegerField()
+    video_file = models.FileField(upload_to='Film/%Y/%m',default='Film/Default.mp4')
+
+    class Meta:
+        unique_together = ('movie', 'episode_number')
+
+    def __str__(self):
+        return f'{self.movie.name} - Episode {self.episode_number}'

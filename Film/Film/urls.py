@@ -21,4 +21,6 @@ urlpatterns = [
     path('', include('filmapp.urls')),
     path('admin/', admin.site.urls),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    #oauth_social
+    path('auth/',include('drf_social_oauth2.urls',namespace='drf'))
 ]

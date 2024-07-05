@@ -44,6 +44,21 @@ class MovieGenreSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class MovieEpisodeSerializer(serializers.ModelSerializer):
+    video_file = serializers.SerializerMethodField(source="video_file")
+
+    def get_video_file(self, obj):
+        if obj.video_file:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            video_file = obj.video_file
+            return self.context['request'].build_absolute_uri(f"/static/{video_file}")
+        return None
+
+    class Meta:
+        model = MovieEpisode
+        fields = '__all__'
+
+
 # SERIALIZERS IN THERE USE FOR DETAIL AND LIST
 class UserDetailSerializer(UserSerializer):
     role = RoleSerializer()
@@ -62,7 +77,13 @@ class UserDetailSerializer(UserSerializer):
 
 
 class MovieDetailSerializer(MovieSerializer):
-    poster = serializers.SerializerMethodField(source="poster")
+    poster = serializers.SerializerMethodField()
+    genre = serializers.SerializerMethodField()
+    episode = serializers.SerializerMethodField()
+
+    def get_episode(self, obj):
+        movie_episodes = MovieEpisode.objects.filter(movie=obj)
+        return MovieEpisodeSerializer(movie_episodes, many=True, context=self.context).data
 
     def get_poster(self, obj):
         if obj.poster:
@@ -71,10 +92,14 @@ class MovieDetailSerializer(MovieSerializer):
             return self.context['request'].build_absolute_uri(f"/static/{poster}")
         return None
 
+    def get_genre(self, obj):
+        movie_genres = MovieGenre.objects.filter(movie=obj).select_related('genre')
+        return GenreSerializer([mg.genre for mg in movie_genres], many=True).data
+
     class Meta(MovieSerializer.Meta):
-        pass
+        fields = ['id', 'name', 'rating', 'release_date', 'duration', 'poster','genre','episode']
 
 
 class MovieListSerializer(MovieDetailSerializer):
     class Meta(MovieDetailSerializer.Meta):
-        fields = ['id', 'name', 'rating', 'release_date', 'duration', 'poster']
+        fields = ['id', 'name', 'rating', 'release_date', 'duration', 'poster','genre']

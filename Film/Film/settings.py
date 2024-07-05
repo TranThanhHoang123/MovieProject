@@ -41,10 +41,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'oauth2_provider',
+    'social_django',
+    'drf_social_oauth2',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'drf_social_oauth2.authentication.SocialAuthentication'
 )
 }
 MIDDLEWARE = [
@@ -75,6 +78,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -139,3 +144,28 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CLIENT_ID="mgdwARu0MkYWAj4JrH18tLnoXZvhFMQAwfsSI4uQ"
 CLIENT_SECRECT="uw2Y2YV8MUbHXAt83DEIrrf5cPkdXrZ8b9mD4T1iyOPkfHqnrelZGRmhrHPleOxfglszHjaMoMGj6178cbTMV1rfjQu0ewyxK8MXUEKk44g2G21xAncMveiWCaPrNmth"
+
+AUTHENTICATION_BACKENDS = (
+    # Facebook OAuth2
+    'social_core.backends.facebook.FacebookAppOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+
+    # drf_social_oauth2
+    'drf_social_oauth2.backends.DjangoOAuth2',
+
+    # Django
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Facebook configuration
+SOCIAL_AUTH_FACEBOOK_KEY = '<your app id goes here>'
+SOCIAL_AUTH_FACEBOOK_SECRET = '<your app secret goes here>'
+
+# Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from Facebook.
+# Email is not sent by default, to get it, you must request the email permission.
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+    'fields': 'id, name, email'
+}
+STRIPE_SECRET_KEY = 'sk_test_51PYJpzRqcphIMLUdEX4uiJIWSk98O67Nmwblktuo5ODxHIlrsOGwPsaYFcnSWzYNeVKAjLAWjpGhZJG9gmL3fbd300Xvot4kHb'
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51PYJpzRqcphIMLUdXSu4TJIns0DkQwRTjqVt6Jv96dxlMze0zygMHsKHZNVcFhnsWRNIv9p6Wwo1xmBhqn947NFV006gvTsWzY'

@@ -9,6 +9,14 @@ from rest_framework.response import Response
 from . import my_generics
 from django.contrib.auth.hashers import check_password
 from django.db import IntegrityError
+#new
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
+import stripe
+import json
+from rest_framework.decorators import api_view
 
 
 # Create your views here.
@@ -73,13 +81,15 @@ class GenreViewSet(viewsets.ViewSet, generics.CreateAPIView, my_generics.ListApi
     serializer_class = GenreSerializer
 
 
-class MovieViewSet(viewsets.ViewSet, generics.CreateAPIView, my_generics.ListApiViewFilterByName,my_generics.UpdateAPIView):
+class MovieViewSet(viewsets.ViewSet, generics.CreateAPIView, my_generics.ListApiViewFilterByName,my_generics.UpdateAPIView,generics.RetrieveAPIView):
     queryset = Movie.objects.all().order_by('-created_date')
     serializer_class = MovieSerializer
 
     def get_serializer_class(self):
         if self.action in ['list']:
             return MovieListSerializer
+        if self.action in ['retrieve']:
+            return MovieDetailSerializer
         return self.serializer_class
 
     @action(methods=['post'],url_path='add-genres-to-movie',detail=True)
@@ -101,3 +111,25 @@ class MovieViewSet(viewsets.ViewSet, generics.CreateAPIView, my_generics.ListApi
             except IntegrityError:
                 pass
         return Response({"message": "Adding genres to movie successfully"},status=status.HTTP_200_OK)
+
+
+class MovieEpisodeViewSet(viewsets.ViewSet, generics.CreateAPIView):
+    queryset = MovieEpisode.objects.all()
+    serializer_class = MovieEpisodeSerializer
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@csrf_exempt
+def create_payment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            intent = stripe.PaymentIntent.create(
+                amount=data['amount'],
+                currency='usd',
+                payment_method_types=['card'],
+            )
+            return JsonResponse({'client_secret': intent['client_secret']})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=403)
